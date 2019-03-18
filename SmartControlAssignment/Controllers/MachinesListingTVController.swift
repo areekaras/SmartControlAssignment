@@ -20,8 +20,6 @@ class MachinesListingTVController: UITableViewController {
         }
     }
     
-    //Store and retieve user details in and from KeyChain
-    var userToken = ""
     var companyId: Int = 0
     
     var machines: [Asset] = []
@@ -56,6 +54,7 @@ extension MachinesListingTVController {
         refreshControl = UIRefreshControl()
         self.tableView.addSubview(self.refreshControl!)
         self.refreshControl?.addTarget(self, action: #selector(refreshMachinesData(_:)), for: .valueChanged)
+        
     }
     
     private func registerCells() {
@@ -94,38 +93,43 @@ extension MachinesListingTVController {
     }
     
     func getMachineList(companyId:Int, url : String) {
+        self.refreshControl?.isEnabled = false
+        
         let service = Service()
         service.setConfigUrl(url)
         service.requestMethod(RequestMethod.GET.rawValue)
-        service.setToken(userToken)
         service.getMachineList(companyField: companyId){ [weak self] (data, action, serviceStatus) in
             print(data ?? "")
-            if serviceStatus == ServiceStatus.FAILED.rawValue {
+            
+            guard let data = data else { return }
+            
+            do {
+                let response = try JSONDecoder().decode(AssetsApiDats.self, from: data)
+                print(response)
                 
-            }
-            else {
-                guard let data = data else { return }
-                
-                do {
-                    print(data)
-                    
-                    let response = try JSONDecoder().decode(AssetsApiDats.self, from: data)
-                    print(response)
-                    
-                    guard let machines = response.data?.assets else { return }
-                    
-                    self?.machines = machines
-                    
+                if serviceStatus == ServiceStatus.FAILED.rawValue || response.status == 0 {
                     DispatchQueue.main.async {
                         self?.refreshControl?.endRefreshing()
-                        self?.tableView.reloadData()
-                    }
-                    
+                        self?.refreshControl?.isEnabled = true
+                        self?.tableView.backgroundView = nil
+                        self?.showAlert(message: response.message ?? "Error")                    }
+                    return
                 }
-                catch let jsonErr {
-                    print("jsonErr :: \(jsonErr)")
+                
+                guard let machines = response.data?.assets else { return }
+                
+                self?.machines = machines
+                
+                DispatchQueue.main.async {
+                    self?.refreshControl?.endRefreshing()
+                    self?.refreshControl?.isEnabled = true
+                    self?.tableView.reloadData()
                 }
             }
+            catch let jsonErr {
+                print("jsonErr :: \(jsonErr)")
+            }
+            
         }
     }
     

@@ -32,11 +32,6 @@ public enum ServiceStatus : String {
     case ERROR = "Error"
 }
 
-public struct AuthDetails {
-    static var name = "christoph.halang+apple@z-lab.com"
-    static var password = "someTEST"
-}
-
 private enum AuthParameters : String {
     case email = "email"
     case password = "password"
@@ -55,7 +50,7 @@ private var _timeOutInterval: Int = 15
 private var _allowCelllarAccess:Bool = true
 var _requestMethod:String = RequestMethod.GET.rawValue
 
-private var _token : String = ""
+//private var _token : String = ""
 
 /// Service Class to Handle API calls
 open class Service :NSObject  {
@@ -80,9 +75,9 @@ open class Service :NSObject  {
         _requestMethod = value
     }
     
-    open func setToken(_ value:String) {
-        _token = value;
-    }
+//    open func setToken(_ value:String) {
+//        _token = value;
+//    }
     
     func loginUser(email:String, password:String, _ completion:@escaping (_ data:Data?,_ action:String,_ serviceStatus:String) -> Void) {
         guard let myUrl:URL = URL(string: _url) else { return }
@@ -103,12 +98,18 @@ open class Service :NSObject  {
     }
     
     func getMachineList(companyField:Int, _ completion:@escaping (_ data:Data?,_ action:String,_ serviceStatus:String) -> Void) {
-        guard let myUrl:URL = URL(string: _url + "?company_id=\(companyField)") else { return }
+        guard let myUrl:URL = URL(string: _url + "?company_id=\(companyField)" ) else { return }
+        
+        guard let token = DAKeychain.shared["token"] else {
+            completion(nil, "No Token", ServiceStatus.FAILED.rawValue)
+            return
+        }
         
         let request = NSMutableURLRequest(url: myUrl)
         request.httpMethod = _requestMethod
         request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
-        request.addValue("Bearer \(_token)", forHTTPHeaderField: "Authorization")
+        
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
 //        let parameters: [String: Any] = [
 //            DataParameters.page.rawValue: 1,

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		60170B5D223FC79700BDD241 /* DAKeyChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60170B5C223FC79700BDD241 /* DAKeyChain.swift */; };
 		603988E2223F649D006CBE0A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603988E1223F649D006CBE0A /* AppDelegate.swift */; };
 		603988E7223F649D006CBE0A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 603988E5223F649D006CBE0A /* Main.storyboard */; };
 		603988E9223F649D006CBE0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 603988E8223F649D006CBE0A /* Assets.xcassets */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		60170B5C223FC79700BDD241 /* DAKeyChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DAKeyChain.swift; sourceTree = "<group>"; };
 		603988DE223F649D006CBE0A /* SmartControlAssignment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartControlAssignment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		603988E1223F649D006CBE0A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		603988E6223F649D006CBE0A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				60398900223F6F84006CBE0A /* Service.swift */,
+				60170B5C223FC79700BDD241 /* DAKeyChain.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -211,6 +214,7 @@
 				603988F7223F657B006CBE0A /* MachinesListingTVController.swift in Sources */,
 				60398908223F88EE006CBE0A /* CustomImageView.swift in Sources */,
 				6039890C223F8EF8006CBE0A /* LoginViewController.swift in Sources */,
+				60170B5D223FC79700BDD241 /* DAKeyChain.swift in Sources */,
 				60398903223F77AB006CBE0A /* User.swift in Sources */,
 				603988E2223F649D006CBE0A /* AppDelegate.swift in Sources */,
 				60398905223F8044006CBE0A /* Machine.swift in Sources */,

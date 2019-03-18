@@ -20,10 +20,6 @@ class LoginViewController: UIViewController {
     
     let MachineVCSegueId = "showMachineLisitingVC"
     
-    //Store and retrieve token in/from keychain
-    var token = ""
-    
-    
     var user:User? {
         didSet {
             DispatchQueue.main.async {
@@ -37,22 +33,11 @@ class LoginViewController: UIViewController {
         
 //        self.emailTF.text = AuthDetails.name
 //        self.passwordTF.text = AuthDetails.password
-
+        self.emailTF.becomeFirstResponder()
     }
+    
     @IBAction func loginTapped(_ sender: Any) {
-        if !(self.emailTF.text ?? "").isEmpty && !(self.passwordTF.text ?? "").isEmpty {
-            
-            DispatchQueue.main.async {
-                self.activityIndicator.startAnimating()
-                
-            }
-            
-            
-            self.authenticateUser(url: BaseUrl.baseUrl.rawValue + RelativeUrl.login.rawValue)
-        }
-        else {
-            self.showAlert(message: "Enter Auths")
-        }
+        self.loginAction()
     }
     
     
@@ -67,13 +52,13 @@ class LoginViewController: UIViewController {
         
         let machineListingTVC = navVC?.viewControllers.first as! MachinesListingTVController
         
-        machineListingTVC.userToken = self.token
         machineListingTVC.user = self.user
     }
 
 }
 
 extension LoginViewController {
+    
     private func authenticateUser(url : String) {
         let service = Service()
         service.setConfigUrl(url)
@@ -85,34 +70,33 @@ extension LoginViewController {
                 self?.activityIndicator.stopAnimating()
             }
             
-            if serviceStatus == ServiceStatus.FAILED.rawValue {
-                print("failure")
+            guard let data = data else { return }
+            
+            do {
+                print(data)
+                let response = try JSONDecoder().decode(ResponseData.self, from: data)
                 
+                if serviceStatus == ServiceStatus.FAILED.rawValue || response.status == 0 {
+                    DispatchQueue.main.async {
+                        self?.showAlert(message: response.message ?? "Error")                    }
+                    return
+                }
+                
+                guard let userData = response.data else { return }
+                guard let user = userData.user else { return }
+                
+                guard let token = userData.token else { return }
+                DAKeychain.shared["token"] = token
+                
+                self?.user = user
+               
+                print(userData)
             }
-            else {
-                guard let data = data else { return }
-                
-                do {
-                    print(data)
-                    let response = try JSONDecoder().decode(ResponseData.self, from: data)
-                    
-                    guard let userData = response.data else { return }
-                    
-                    //*****Store this token to KeyChain
-                    guard let user = userData.user else { return }
-                    
-                    guard let token = userData.token else { return }
-                    
-                    self?.user = user
-                    self?.token = token
-                    
-                    print(userData)
-                }
-                catch let jsonErr {
-                    print("jsonErr :: \(jsonErr)")
-                }
+            catch let jsonErr {
+                print("jsonErr :: \(jsonErr)")
             }
         }
+        
     }
     
     func showAlert(message:String) {
@@ -121,5 +105,39 @@ extension LoginViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
+    private func loginAction() {
+        if (self.emailTF.text ?? "").isEmpty
+        {
+            self.showAlert(message: "Enter email")
+        }
+        else if (self.passwordTF.text ?? "").isEmpty {
+            self.showAlert(message: "Enter password")
+        }
+        else {
+            self.activityIndicator.startAnimating()
+            self.authenticateUser(url: BaseUrl.baseUrl.rawValue + RelativeUrl.login.rawValue)
+        }
+    }
     
+}
+
+extension LoginViewController: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTF {
+            passwordTF.becomeFirstResponder()
+        }
+        else if textField == passwordTF {
+            passwordTF.resignFirstResponder()
+            self.loginAction()
+        }
+        
+        return true
+    }
+    
+}
+
+public struct AuthDetails {
+    static var name = "christoph.halang+apple@z-lab.com"
+    static var password = "someTEST"
 }
