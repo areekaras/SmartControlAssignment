@@ -55,7 +55,6 @@ private var _timeOutInterval: Int = 15
 private var _allowCelllarAccess:Bool = true
 var _requestMethod:String = RequestMethod.GET.rawValue
 
-private var _companyId : Int = 0
 private var _token : String = ""
 
 /// Service Class to Handle API calls
@@ -81,10 +80,6 @@ open class Service :NSObject  {
         _requestMethod = value
     }
     
-    open func setCompanyId(_ value:Int) {
-        _companyId = value;
-    }
-    
     open func setToken(_ value:String) {
         _token = value;
     }
@@ -107,21 +102,21 @@ open class Service :NSObject  {
         })
     }
     
-    func getMachineList(_ completion:@escaping (_ data:Data?,_ action:String,_ serviceStatus:String) -> Void) {
-        guard let myUrl:URL = URL(string: _url) else { return }
+    func getMachineList(companyField:Int, _ completion:@escaping (_ data:Data?,_ action:String,_ serviceStatus:String) -> Void) {
+        guard let myUrl:URL = URL(string: _url + "?company_id=\(companyField)") else { return }
         
         let request = NSMutableURLRequest(url: myUrl)
         request.httpMethod = _requestMethod
         request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
         request.addValue("Bearer \(_token)", forHTTPHeaderField: "Authorization")
         
-        let parameters: [String: Any] = [
-            DataParameters.page.rawValue: 1,
-            DataParameters.limit.rawValue: 100,
-            DataParameters.companyId.rawValue: _companyId,
-            
-        ]
-        request.httpBody = parameters.percentEscaped().data(using: .utf8)
+//        let parameters: [String: Any] = [
+//            DataParameters.page.rawValue: 1,
+//            DataParameters.limit.rawValue: 100,
+//            DataParameters.companyId.rawValue: companyField,
+//        ]
+//
+//        request.httpBody = parameters.percentEscaped().data(using: .utf8)
         
         self.execute(request: request as URLRequest, { (data, response, error) in
             completion(data, response, error)

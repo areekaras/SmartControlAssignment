@@ -12,8 +12,6 @@ public struct AssetsApiDats: Codable {
     let status:Int?
     let message:String?
     let data: MachineData?
-    let links:Link?
-    let meta:Meta?
 }
 
 public struct MachineData: Codable {
@@ -34,11 +32,4 @@ public struct Image: Codable {
     let isdeleted:Int?
 }
 
-public struct Link: Codable {
-    let first:Int?
-    
-}
 
-public struct Meta: Codable {
-    let current_page:Int?
-}

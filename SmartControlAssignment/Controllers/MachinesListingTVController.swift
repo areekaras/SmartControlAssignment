@@ -10,14 +10,13 @@ import UIKit
 
 class MachinesListingTVController: UITableViewController {
 
+    
     let machinceCellId = "MachineDisplayTVCell"
     
     
     var user:User? {
         didSet {
-            guard let companyId = user?.company?.id else { return }
-            
-            self.getMachineList(companyId:companyId, url: BaseUrl.baseUrl.rawValue + RelativeUrl.machineList.rawValue)
+            self.callMachineListApi()
         }
     }
     
@@ -49,6 +48,14 @@ extension MachinesListingTVController {
         
         self.tableView.estimatedRowHeight = tableView.rowHeight
         self.tableView.rowHeight = UITableViewAutomaticDimension
+        
+        let spinner = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        spinner.startAnimating()
+        tableView.backgroundView = spinner
+        
+        refreshControl = UIRefreshControl()
+        self.tableView.addSubview(self.refreshControl!)
+        self.refreshControl?.addTarget(self, action: #selector(refreshMachinesData(_:)), for: .valueChanged)
     }
     
     private func registerCells() {
@@ -80,14 +87,18 @@ extension MachinesListingTVController {
 
 extension MachinesListingTVController {
     
+    private func callMachineListApi() {
+        guard let companyId = user?.company?.id else { return }
+        
+        self.getMachineList(companyId:companyId, url: BaseUrl.baseUrl.rawValue + RelativeUrl.machineList.rawValue)
+    }
     
     func getMachineList(companyId:Int, url : String) {
         let service = Service()
         service.setConfigUrl(url)
-        service.setCompanyId(companyId)
         service.requestMethod(RequestMethod.GET.rawValue)
         service.setToken(userToken)
-        service.getMachineList{ [weak self] (data, action, serviceStatus) in
+        service.getMachineList(companyField: companyId){ [weak self] (data, action, serviceStatus) in
             print(data ?? "")
             if serviceStatus == ServiceStatus.FAILED.rawValue {
                 
@@ -99,12 +110,14 @@ extension MachinesListingTVController {
                     print(data)
                     
                     let response = try JSONDecoder().decode(AssetsApiDats.self, from: data)
+                    print(response)
                     
                     guard let machines = response.data?.assets else { return }
                     
                     self?.machines = machines
                     
                     DispatchQueue.main.async {
+                        self?.refreshControl?.endRefreshing()
                         self?.tableView.reloadData()
                     }
                     
@@ -114,6 +127,10 @@ extension MachinesListingTVController {
                 }
             }
         }
+    }
+    
+    @objc private func refreshMachinesData(_ sender: Any) {
+        self.callMachineListApi()
     }
     
     func showAlert(message:String) {

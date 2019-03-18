@@ -35,8 +35,8 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.emailTF.text = AuthDetails.name
-        self.passwordTF.text = AuthDetails.password
+//        self.emailTF.text = AuthDetails.name
+//        self.passwordTF.text = AuthDetails.password
 
     }
     @IBAction func loginTapped(_ sender: Any) {
@@ -67,8 +67,8 @@ class LoginViewController: UIViewController {
         
         let machineListingTVC = navVC?.viewControllers.first as! MachinesListingTVController
         
-        machineListingTVC.user = self.user
         machineListingTVC.userToken = self.token
+        machineListingTVC.user = self.user
     }
 
 }
@@ -98,7 +98,7 @@ extension LoginViewController {
                     
                     guard let userData = response.data else { return }
                     
-                    
+                    //*****Store this token to KeyChain
                     guard let user = userData.user else { return }
                     
                     guard let token = userData.token else { return }
